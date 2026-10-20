@@ -13,6 +13,17 @@ Chúc {to} luôn tự tin, tỏa sáng theo cách riêng của mình và mãi l�
 
 Happy Women's Day! 🌷`;
 
+const FRESH_WISHES = [
+  "Chúc {to} ngày 20/10 ngập tràn niềm vui, luôn rạng rỡ và được yêu thương thật nhiều. 🌷",
+  "Mong {to} luôn dịu dàng với chính mình, tự tin tỏa sáng và gặp thật nhiều điều may mắn. 💐",
+  "Chúc {to} mỗi ngày đều có một lý do để mỉm cười và thật nhiều người thương bên cạnh. ♡",
+  "Gửi {to} một đóa hoa cùng lời chúc bình yên, hạnh phúc và luôn xinh đẹp theo cách riêng. 🌸",
+  "Chúc {to} luôn vui khỏe, an yên và biến mọi điều mình mong ước thành hiện thực. ✨",
+  "Mong nụ cười luôn ở trên môi {to}, và những điều ngọt ngào sẽ ghé thăm mỗi ngày. 🌷",
+  "Chúc {to} được trân trọng hôm nay và mọi ngày, luôn tự tin và hạnh phúc với lựa chọn của mình. 💕",
+  "Ngày 20/10 thật vui nhé {to}! Mong khu vườn cuộc sống của bạn luôn nở đầy hoa và yêu thương. 🌼",
+];
+
 const stems = [
   { x: 205, lean: -44, height: 285, bloom: "#e87870", delay: 0.2 },
   { x: 280, lean: -22, height: 350, bloom: "#f49b8e", delay: 0.45 },
@@ -111,6 +122,7 @@ export default function Home() {
   const [to, setTo] = useState("Bạn");
   const [from, setFrom] = useState("");
   const [wish, setWish] = useState(DEFAULT_WISH);
+  const [wishEdited, setWishEdited] = useState(false);
   const [opened, setOpened] = useState(false);
   const [builderOpen, setBuilderOpen] = useState(false);
   const [notice, setNotice] = useState("");
@@ -121,6 +133,7 @@ export default function Home() {
   const root = useRef(null);
   const card = useRef(null);
   const audio = useRef(null);
+  const previousWishIndex = useRef(-1);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -258,20 +271,27 @@ export default function Home() {
     window.setTimeout(() => document.querySelector(".letter-section")?.scrollIntoView({ behavior: "smooth", block: "start" }), 500);
   }
 
-  async function getShareUrl() {
+  function makeFreshWish() {
+    let index = Math.floor(Math.random() * FRESH_WISHES.length);
+    if (index === previousWishIndex.current) index = (index + 1 + Math.floor(Math.random() * (FRESH_WISHES.length - 1))) % FRESH_WISHES.length;
+    previousWishIndex.current = index;
+    return FRESH_WISHES[index].replaceAll("{to}", to.trim() || "Bạn");
+  }
+
+  async function getShareUrl(message = wish) {
     const params = new URLSearchParams();
-    if (wish === DEFAULT_WISH) {
+    if (message === DEFAULT_WISH) {
       if (to.trim() && to !== "Bạn") params.set("to", to.trim());
       if (from.trim()) params.set("from", from.trim());
-    } else if (wish.length > 220) {
-      const response = await fetch("/api/cards", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ to, from, wish }) });
+    } else if (message.length > 220) {
+      const response = await fetch("/api/cards", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ to, from, wish: message }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Không thể lưu thiệp.");
       params.set("id", data.id);
     } else {
       if (to.trim() && to !== "Bạn") params.set("to", to.trim());
       if (from.trim()) params.set("from", from.trim());
-      params.set("wish", wish);
+      params.set("wish", message);
     }
     return `${window.location.origin}${window.location.pathname}${params.size ? `?${params}` : ""}`;
   }
@@ -279,19 +299,23 @@ export default function Home() {
   async function makeLink(event) {
     event.preventDefault();
     try {
-      const url = await getShareUrl();
+      const message = wishEdited ? wish : makeFreshWish();
+      if (!wishEdited) setWish(message);
+      const url = await getShareUrl(message);
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(url);
-        setNotice("Đã tạo và sao chép liên kết thiệp 🌷");
+        setNotice(wishEdited ? "Đã tạo và sao chép liên kết thiệp 🌷" : "Đã tạo thiệp với lời chúc mới và sao chép liên kết 🌷");
       } else setNotice(url);
     } catch (error) { setNotice(error.message); }
   }
 
   async function shareCard() {
     try {
-      const url = await getShareUrl();
+      const message = wishEdited ? wish : makeFreshWish();
+      if (!wishEdited) setWish(message);
+      const url = await getShareUrl(message);
       if (navigator.share) await navigator.share({ title: "A Little Flower For You", text: "Một đóa hoa nhỏ dành cho bạn 🌷", url });
-      else if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(url); setNotice("Đã sao chép liên kết để bạn gửi đi 🌷"); }
+      else if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(url); setNotice(wishEdited ? "Đã sao chép liên kết để bạn gửi đi 🌷" : "Đã tạo lời chúc mới và sao chép liên kết để gửi 🌷"); }
       else setNotice(url);
     } catch (error) { setNotice(error.message); }
   }
@@ -349,7 +373,7 @@ export default function Home() {
         {builderOpen && <motion.form className="builder-form" onSubmit={makeLink} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
           <label>Tên người nhận<input maxLength={40} value={to === "Bạn" ? "" : to} onChange={(e) => setTo(e.target.value)} placeholder="Ví dụ: Ngọc Anh" autoComplete="off" /></label>
           <label>Tên người gửi <small>(không bắt buộc)</small><input maxLength={40} value={from} onChange={(e) => setFrom(e.target.value)} placeholder="Tên của bạn" autoComplete="off" /></label>
-          <label>Lời chúc<textarea maxLength={600} rows={6} value={wish} onChange={(e) => setWish(e.target.value)} /></label>
+          <label>Lời chúc<textarea maxLength={600} rows={6} value={wish} onChange={(e) => { setWishEdited(true); setWish(e.target.value); }} /></label>
           <button className="share-button create-button" type="submit">Tạo thiệp của bạn <span>♡</span></button>
           <p className="form-note" role="status">{notice || "Thiệp được tạo ngay trên trình duyệt của bạn."}</p>
         </motion.form>}
