@@ -20,10 +20,19 @@ const stems = [
   { x: 510, lean: 50, height: 305, bloom: "#df777a", delay: 0.55 },
 ];
 
+const backdropBlooms = [
+  { x: 28, y: 444, size: 0.75, color: "#d97879", delay: 0.1, lean: -13 },
+  { x: 88, y: 545, size: 0.55, color: "#e99088", delay: 0.35, lean: 17 },
+  { x: 24, y: 654, size: 0.48, color: "#e7a19a", delay: 0.55, lean: 8 },
+  { x: 362, y: 425, size: 0.66, color: "#dd777a", delay: 0.25, lean: 13 },
+  { x: 306, y: 536, size: 0.72, color: "#ef9b8e", delay: 0.05, lean: -16 },
+  { x: 367, y: 664, size: 0.52, color: "#e5a29a", delay: 0.45, lean: -8 },
+];
+
 function Tulip({ x, lean, height, bloom, delay, index }) {
   const top = 470 - height;
   return (
-    <g className={`stem stem-${index}`} style={{ "--grow-delay": `${delay}s` }}>
+    <g className={`stem stem-${index}`} transform={`translate(${x - 360} 0)`} style={{ "--grow-delay": `${delay}s` }}>
       <path className="stem-line" d={`M 360 540 Q ${360 + lean * 0.36} 395 ${360 + lean} ${top + 25}`} />
       <path className="leaf leaf-left" d={`M ${350 + lean * 0.38} 420 Q ${285 + lean * 0.5} 366 ${296 + lean * 0.42} 329 Q ${358 + lean * 0.4} 350 ${350 + lean * 0.38} 420Z`} />
       <path className="leaf leaf-right" d={`M ${362 + lean * 0.68} 468 Q ${420 + lean * 0.5} 409 ${443 + lean * 0.45} 424 Q ${425 + lean * 0.4} 479 ${362 + lean * 0.68} 468Z`} />
@@ -35,6 +44,28 @@ function Tulip({ x, lean, height, bloom, delay, index }) {
         <path d="M-30-28 Q-20-47-11-53 M7-58 Q13-35 13-21" fill="none" stroke="#ffd1c6" strokeWidth="3" strokeLinecap="round" opacity=".58" />
       </g>
     </g>
+  );
+}
+
+function BackdropGarden() {
+  return (
+    <svg className="backdrop-art" viewBox="0 0 390 844" preserveAspectRatio="none" aria-hidden="true">
+      <defs><linearGradient id="backdrop-stem" x1="0" y1="1" x2="0.12" y2="0"><stop stopColor="#7c8966" stopOpacity=".12"/><stop offset="1" stopColor="#697c59" stopOpacity=".7"/></linearGradient></defs>
+      {backdropBlooms.map((flower, index) => {
+        const top = flower.y;
+        return <g className="backdrop-flower" key={index} style={{ "--flower-delay": `${flower.delay}s` }}>
+          <path className="backdrop-stem" d={`M ${flower.x + flower.lean * .35} 880 Q ${flower.x - flower.lean} 690 ${flower.x + flower.lean} ${top + 32}`} />
+          <path className="backdrop-leaf" d={`M ${flower.x + flower.lean * .1} 740 Q ${flower.x - 62} 696 ${flower.x - 54} 668 Q ${flower.x - 1} 684 ${flower.x + flower.lean * .1} 740Z`} />
+          <path className="backdrop-leaf leaf-2" d={`M ${flower.x + flower.lean * .2} 805 Q ${flower.x + 44} 757 ${flower.x + 66} 778 Q ${flower.x + 48} 814 ${flower.x + flower.lean * .2} 805Z`} />
+          <g className="backdrop-head" transform={`translate(${flower.x + flower.lean} ${top}) scale(${flower.size})`} style={{ color: flower.color }}>
+            <path d="M-23 17 C-35-11-28-35-13-43 C-6-28-4-9 0 16Z" fill={flower.color}/>
+            <path d="M-13 17 C-19-19-9-48 0-53 C10-39 9-9 7 17Z" fill="#f8b7a9"/>
+            <path d="M-2 17 C6-11 11-40 24-43 C36-27 31-5 19 17Z" fill={flower.color}/>
+            <path d="M-20 13 Q0 22 23 13" fill="none" stroke="#fff0dc" strokeWidth="2" opacity=".65"/>
+          </g>
+        </g>;
+      })}
+    </svg>
   );
 }
 
@@ -91,8 +122,10 @@ export default function Home() {
   useEffect(() => {
     if (reduceMotion || !root.current) return;
     const ctx = gsap.context(() => {
-      gsap.fromTo(".stem", { scaleY: 0, transformOrigin: "50% 100%" }, { scaleY: 1, duration: 1.4, stagger: 0.13, ease: "power2.out", delay: 0.25 });
-      gsap.fromTo(".intro-copy > *", { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 1, stagger: 0.16, ease: "power2.out", delay: 0.7 });
+      const reveal = gsap.timeline({ defaults: { ease: "power2.out" } });
+      reveal.fromTo(".backdrop-stem", { scaleY: 0, transformOrigin: "50% 100%" }, { scaleY: 1, duration: 0.9, stagger: 0.08 })
+        .fromTo(".stem", { scaleY: 0, transformOrigin: "50% 100%" }, { scaleY: 1, duration: 1.05, stagger: 0.11 }, "-=0.42")
+        .fromTo(".intro-copy > *", { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.72, stagger: 0.11 }, "-=0.9");
     }, root);
     return () => ctx.revert();
   }, [reduceMotion]);
@@ -137,7 +170,7 @@ export default function Home() {
     if (opened) return;
     setOpened(true);
     playNote();
-    setHearts(Array.from({ length: 12 }, (_, i) => ({ id: `${Date.now()}-${i}`, left: 42 + Math.random() * 16, delay: Math.random() * 0.6 })));
+    setHearts(Array.from({ length: 22 }, (_, i) => ({ id: `${Date.now()}-${i}`, left: 35 + Math.random() * 30, delay: Math.random() * 0.65, petal: i < 16 })));
     window.setTimeout(() => setHearts([]), 2400);
     window.setTimeout(() => document.querySelector(".letter-section")?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" }), reduceMotion ? 0 : 500);
   }
@@ -192,6 +225,7 @@ export default function Home() {
     <main ref={root} className={`page-shell ${opened ? "is-open" : ""}`}>
       <div className="paper-grain" aria-hidden="true" />
       <section className="garden-scene" aria-label="Khu vườn tulip ngày 20 tháng 10">
+        <BackdropGarden />
         <div className="scene-topline"><span>20 · 10</span><span className="topline-flower">✿</span><span>Một điều dịu dàng</span></div>
         <div className="garden-wrap"><Garden opened={opened} onFlowerTap={() => { playNote(); document.querySelector(".garden-art")?.classList.add("flower-tap"); window.setTimeout(() => document.querySelector(".garden-art")?.classList.remove("flower-tap"), 700); }} />
           <div className="intro-copy">
@@ -202,7 +236,7 @@ export default function Home() {
           </div>
         </div>
         <div className="scene-bottom"><span>TRƯỢT NHẸ ĐỂ KHÁM PHÁ</span><span className="scroll-stem" /></div>
-        {hearts.map((heart) => <span key={heart.id} className="floating-heart" style={{ left: `${heart.left}%`, animationDelay: `${heart.delay}s` }} aria-hidden="true">♡</span>)}
+        {hearts.map((heart) => <span key={heart.id} className={heart.petal ? "floating-petal" : "floating-heart"} style={{ left: `${heart.left}%`, animationDelay: `${heart.delay}s` }} aria-hidden="true">{heart.petal ? "❀" : "♡"}</span>)}
       </section>
 
       <section className={`letter-section ${opened ? "letter-visible" : "letter-waiting"}`}>
