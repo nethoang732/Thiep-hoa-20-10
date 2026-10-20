@@ -20,3 +20,23 @@ button,input,textarea{font:inherit}button{color:inherit}
 @media(max-width:380px){.garden-scene{min-height:700px;padding-inline:16px}.garden-wrap{margin-top:-12px}.garden-art{width:125%;bottom:5%}.intro-copy{top:17%}.intro-copy h1{font-size:45px;margin:13px 0 10px}.intro-copy p{font-size:12px}.open-button{margin-top:17px}.letter-section{padding-inline:13px}.letter-card{padding-inline:22px}.wish-line{font-size:13px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.intro-copy>*{opacity:1!important}}
 
+/* The garden has a second, quieter layer of blooms behind the main bouquet. */
+.backdrop-art{position:absolute;z-index:0;top:0;left:50%;width:min(100%,520px);height:100%;transform:translateX(-50%);overflow:visible;pointer-events:none}
+.backdrop-stem{fill:none;stroke:url(#backdrop-stem);stroke-width:5;stroke-linecap:round;opacity:.88}
+.backdrop-leaf{fill:#879472;stroke:#738262;stroke-width:1.2;opacity:.66}
+.leaf-2{fill:#9ba181;opacity:.58}
+.backdrop-head{filter:drop-shadow(0 3px 5px rgba(127,80,69,.1));opacity:.88}
+.garden-wrap{z-index:1}
+.intro-copy{z-index:2}
+.intro-copy>*{opacity:1}
+.scene-topline,.scene-bottom{z-index:3}
+.floating-petal{position:absolute;z-index:6;bottom:24%;font:23px 'Playfair Display',serif;color:#cf7d7d;animation:petal-burst 2.3s cubic-bezier(.18,.65,.25,1) forwards;pointer-events:none}
+@keyframes petal-burst{0%{opacity:0;transform:translate3d(0,0,0) rotate(-18deg) scale(.45)}14%{opacity:.9}100%{opacity:0;transform:translate3d(var(--petal-drift,34px),-210px,0) rotate(150deg) scale(.9)}}
+.floating-petal:nth-of-type(3n){--petal-drift:-48px}.floating-petal:nth-of-type(3n + 1){--petal-drift:52px}
+.garden-art{filter:drop-shadow(0 7px 14px rgba(110,80,57,.06))}
+.stem-line{stroke-width:7}
+.leaf{stroke-width:1.8}
+.bloom{filter:drop-shadow(0 3px 4px rgba(122,69,68,.08))}
+.is-open .backdrop-art{transition:opacity .9s ease;opacity:.34}
+@media(max-width:480px){.backdrop-art{width:100%;}.backdrop-head{opacity:.92}.garden-art{width:125%;bottom:4%}.intro-copy{top:16%;}}
+
