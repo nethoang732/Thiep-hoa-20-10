@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
-import { motion, useReducedMotion } from "motion/react";
+import { MotionConfig, motion } from "motion/react";
 
 const DEFAULT_WISH = `Nhân ngày Phụ nữ Việt Nam 20/10, chúc {to} luôn xinh đẹp, rạng rỡ và hạnh phúc.
 
@@ -101,7 +101,6 @@ export default function Home() {
   const root = useRef(null);
   const card = useRef(null);
   const audio = useRef(null);
-  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -120,7 +119,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (reduceMotion || !root.current) return;
+    if (!root.current) return;
     const ctx = gsap.context(() => {
       const reveal = gsap.timeline({ defaults: { ease: "power2.out" } });
       reveal.fromTo(".backdrop-stem", { scaleY: 0, transformOrigin: "50% 100%" }, { scaleY: 1, duration: 0.9, stagger: 0.08 })
@@ -128,16 +127,16 @@ export default function Home() {
         .fromTo(".intro-copy > *", { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.72, stagger: 0.11 }, "-=0.9");
     }, root);
     return () => ctx.revert();
-  }, [reduceMotion]);
+  }, []);
 
   useEffect(() => {
-    if (!opened || !card.current || reduceMotion) return;
+    if (!opened || !card.current) return;
     const ctx = gsap.context(() => {
       gsap.fromTo(card.current, { y: 30, scale: 0.96, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 1.1, ease: "power3.out" });
       gsap.fromTo(".wish-line", { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.65, stagger: 0.32, delay: 0.45, ease: "power2.out" });
     }, root);
     return () => ctx.revert();
-  }, [opened, reduceMotion]);
+  }, [opened]);
 
   useEffect(() => {
     if (!soundOn) return;
@@ -172,7 +171,7 @@ export default function Home() {
     playNote();
     setHearts(Array.from({ length: 22 }, (_, i) => ({ id: `${Date.now()}-${i}`, left: 35 + Math.random() * 30, delay: Math.random() * 0.65, petal: i < 16 })));
     window.setTimeout(() => setHearts([]), 2400);
-    window.setTimeout(() => document.querySelector(".letter-section")?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" }), reduceMotion ? 0 : 500);
+    window.setTimeout(() => document.querySelector(".letter-section")?.scrollIntoView({ behavior: "smooth", block: "start" }), 500);
   }
 
   async function getShareUrl() {
@@ -222,6 +221,7 @@ export default function Home() {
   const renderedWish = wish.replaceAll("{to}", to.trim() || "Bạn").split("\n").filter(Boolean);
 
   return (
+    <MotionConfig reducedMotion="never">
     <main ref={root} className={`page-shell ${opened ? "is-open" : ""}`}>
       <div className="paper-grain" aria-hidden="true" />
       <section className="garden-scene" aria-label="Khu vườn tulip ngày 20 tháng 10">
@@ -267,6 +267,7 @@ export default function Home() {
         <footer>Gửi một chút dịu dàng, vào ngày thật đẹp.</footer>
       </section>
     </main>
+    </MotionConfig>
   );
 }
 
