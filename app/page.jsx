@@ -139,6 +139,32 @@ export default function Home() {
   }, [opened]);
 
   useEffect(() => {
+    if (!opened) return;
+    let previousY = window.scrollY;
+    let travelledToCard = false;
+    const onScroll = () => {
+      const currentY = window.scrollY;
+      if (currentY > window.innerHeight * 0.72) travelledToCard = true;
+      if (travelledToCard && currentY < previousY && currentY < window.innerHeight * 0.48) {
+        travelledToCard = false;
+        const burst = Array.from({ length: 12 }, (_, i) => ({
+          id: `return-${Date.now()}-${i}`,
+          left: 28 + Math.random() * 44,
+          delay: Math.random() * 0.35,
+          petal: true,
+        }));
+        setHearts(burst);
+        window.setTimeout(() => setHearts((items) => items.filter((item) => !item.id.startsWith("return-"))), 2400);
+        gsap.fromTo(".stem", { scaleY: 0.94, transformOrigin: "50% 100%" }, { scaleY: 1, duration: 0.9, stagger: 0.08, ease: "power2.out", overwrite: true });
+        gsap.fromTo(".backdrop-stem", { scaleY: 0.98, transformOrigin: "50% 100%" }, { scaleY: 1, duration: 0.9, stagger: 0.06, ease: "power2.out", overwrite: true });
+      }
+      previousY = currentY;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [opened]);
+
+  useEffect(() => {
     if (!soundOn) return;
     playNote();
     const timer = window.setInterval(playNote, 6800);
