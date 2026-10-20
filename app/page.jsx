@@ -154,8 +154,18 @@ export default function Home() {
   useEffect(() => {
     if (!opened || !card.current) return;
     const ctx = gsap.context(() => {
-      gsap.fromTo(card.current, { y: 30, scale: 0.96, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 1.1, ease: "power3.out" });
-      gsap.fromTo(".wish-line", { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.65, stagger: 0.32, delay: 0.45, ease: "power2.out" });
+      const reveal = gsap.timeline({ defaults: { ease: "power3.out" } });
+      reveal.fromTo(card.current,
+        { y: 66, rotationX: -13, scale: 0.84, opacity: 0, transformPerspective: 1100 },
+        { y: 0, rotationX: 0, scale: 1, opacity: 1, duration: 1.3, ease: "power3.out" },
+      )
+        .fromTo(".card-aura", { scale: 0.55, opacity: 0 }, { scale: 1.35, opacity: 0.8, duration: 0.55, ease: "power2.out" }, 0)
+        .to(".card-aura", { opacity: 0, duration: 0.65, ease: "power1.out" }, 0.55)
+        .fromTo(".card-corner", { scale: 0.2, rotation: -35, opacity: 0 }, { scale: 1, rotation: 0, opacity: 0.8, duration: 0.55, stagger: 0.07 }, "-=0.85")
+        .fromTo(".card-sparkle", { scale: 0, rotation: -50, opacity: 0 }, { scale: 1, rotation: 0, opacity: 0.9, duration: 0.48, stagger: 0.065 }, "-=0.55")
+        .fromTo(".letter-kicker, .letter-card h2, .date-mark, .to-line", { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.58, stagger: 0.1 }, "-=0.66")
+        .fromTo(".wish-line", { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.58, stagger: 0.27 }, "-=0.35")
+        .fromTo(".from-line, .heart-button, .final-bloom", { y: 8, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, stagger: 0.08 }, "-=0.28");
     }, root);
     return () => ctx.revert();
   }, [opened]);
@@ -316,7 +326,10 @@ export default function Home() {
 
       <section className={`letter-section ${opened ? "letter-visible" : "letter-waiting"}`}>
         <div className="letter-ornament" aria-hidden="true">❧</div>
+        <div className="card-stage">
+        <span className="card-aura" aria-hidden="true" />
         <article className="letter-card" ref={card} aria-live="polite">
+          {Array.from({ length: 8 }, (_, i) => <span key={i} className={`card-sparkle sparkle-${i + 1}`} aria-hidden="true">✦</span>)}
           <div className="card-corner corner-tl">❀</div><div className="card-corner corner-tr">❀</div><div className="card-corner corner-bl">❀</div><div className="card-corner corner-br">❀</div>
           <p className="letter-kicker">A GIFT FOR YOU</p>
           <h2>Happy Women’s Day</h2>
@@ -327,6 +340,7 @@ export default function Home() {
           <button className="heart-button" onClick={sendHeart} aria-label="Gửi một trái tim">♡</button>
           <p className="final-bloom">You deserve all the beautiful things ♡</p>
         </article>
+        </div>
         <div className="letter-actions">
           <button className="share-button" onClick={shareCard}>Chia sẻ thiệp <span>↗</span></button>
           <button className={`sound-button ${soundOn ? "sound-on" : ""}`} onClick={() => setSoundOn((value) => !value)} aria-pressed={soundOn}>{soundOn ? "♫ Âm thanh đang bật" : "♫ Bật giai điệu"}</button>
