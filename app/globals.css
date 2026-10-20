@@ -51,4 +51,10 @@ button,input,textarea{font:inherit}button{color:inherit}
 .wing-right{animation-delay:-.24s}
 @keyframes butterfly-flap{from{transform:scaleX(.5) rotateY(0)}to{transform:scaleX(1) rotateY(24deg)}}
 @keyframes butterfly-rise{0%{opacity:0;transform:translate3d(0,0,0) scale(.65) rotate(-8deg)}12%{opacity:.95}48%{transform:translate3d(calc(var(--flight-drift) * .4),-48vh,0) scale(1) rotate(7deg)}100%{opacity:0;transform:translate3d(var(--flight-drift),-112vh,0) scale(.82) rotate(-10deg)}}
+.card-stage{position:relative;width:min(100%,490px);perspective:1100px}
+.card-aura{position:absolute;z-index:0;inset:7% 5%;border-radius:50%;background:radial-gradient(ellipse at center,rgba(255,251,227,.98) 0%,rgba(245,193,161,.56) 42%,rgba(219,143,129,0) 74%);filter:blur(24px);opacity:0;pointer-events:none}
+.letter-card{position:relative;z-index:1;width:100%;transform-style:preserve-3d;backface-visibility:hidden}
+.letter-visible .card-corner,.letter-visible .card-sparkle{opacity:0}
+.card-sparkle{position:absolute;z-index:2;color:#c58c66;font-size:18px;line-height:1;pointer-events:none;text-shadow:0 1px 9px rgba(228,178,128,.45)}
+.sparkle-1{top:42px;left:47px}.sparkle-2{top:55px;right:45px;font-size:13px}.sparkle-3{top:112px;right:24px;font-size:11px}.sparkle-4{top:172px;left:27px;font-size:12px}.sparkle-5{bottom:120px;right:28px}.sparkle-6{bottom:70px;left:47px;font-size:12px}.sparkle-7{bottom:48px;right:51px;font-size:14px}.sparkle-8{top:44px;right:50%;font-size:11px}
 
