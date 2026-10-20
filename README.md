@@ -1,6 +1,6 @@
 # Interactive Tulip Garden · 20/10
 
-Thiệp chúc mừng Phụ nữ Việt Nam làm bằng Next.js App Router, Tailwind CSS, GSAP và Motion. Trang đầu có khu vườn tulip SVG vẽ riêng, hoạt ảnh nở hoa, thiệp cá nhân hóa, chia sẻ, âm thanh tùy chọn và hỗ trợ giảm chuyển động.
+Thiệp chúc mừng Phụ nữ Việt Nam làm bằng Next.js App Router, Tailwind CSS, GSAP và Motion. Trang đầu có khu vườn tulip SVG vẽ riêng, hoạt ảnh nở hoa, thiệp cá nhân hóa, chia sẻ và âm thanh tùy chọn. Hiệu ứng chuyển động vẫn chạy khi thiết bị đặt chế độ giảm chuyển động.
 
 ## Chạy tại máy
 
