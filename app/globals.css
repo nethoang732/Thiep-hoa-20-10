@@ -39,3 +39,9 @@ button,input,textarea{font:inherit}button{color:inherit}
 .is-open .backdrop-art{transition:opacity .9s ease;opacity:.34}
 @media(max-width:480px){.backdrop-art{width:100%;}.backdrop-head{opacity:.92}.garden-art{width:125%;bottom:4%}.intro-copy{top:16%;}}
 
+/* Keep the garden calm after its one-time reveal; the card stays closed until requested. */
+.garden-sway{animation:none!important;transform:none!important}
+.bloom{animation:none!important}
+.petal-drift{animation:none!important}
+.letter-section.letter-waiting{display:none}
+
