@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { gsap } from "gsap";
 import { MotionConfig, motion } from "motion/react";
 
@@ -69,6 +70,23 @@ function BackdropGarden() {
   );
 }
 
+function Butterfly({ color }) {
+  return (
+    <svg className="butterfly-mark" viewBox="0 0 48 40" aria-hidden="true">
+      <g className="butterfly-wing wing-left" fill={color}>
+        <path d="M23 18C13 2 2 3 4 14c1 6 8 9 17 9Z" />
+        <path d="M22 21C10 15 5 23 11 29c4 4 9 1 13-4Z" opacity=".88" />
+      </g>
+      <g className="butterfly-wing wing-right" fill={color}>
+        <path d="M25 18C35 2 46 3 44 14c-1 6-8 9-17 9Z" />
+        <path d="M26 21c12-6 17 2 11 8-4 4-9 1-13-4Z" opacity=".88" />
+      </g>
+      <path d="M24 15v14" stroke="#775c52" strokeWidth="2" strokeLinecap="round" />
+      <path d="m23 16-4-5m6 5 4-5" fill="none" stroke="#775c52" strokeWidth="1.2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function Garden({ opened, onFlowerTap }) {
   return (
     <svg className={`garden-art ${opened ? "garden-opened" : ""}`} viewBox="0 0 720 600" role="img" aria-label="Năm bông tulip màu hồng được vẽ tay trong khu vườn">
@@ -98,6 +116,8 @@ export default function Home() {
   const [notice, setNotice] = useState("");
   const [soundOn, setSoundOn] = useState(false);
   const [hearts, setHearts] = useState([]);
+  const [butterflies, setButterflies] = useState([]);
+  const [portalReady, setPortalReady] = useState(false);
   const root = useRef(null);
   const card = useRef(null);
   const audio = useRef(null);
@@ -117,6 +137,8 @@ export default function Home() {
         .catch((error) => setNotice(error.message));
     }
   }, []);
+
+  useEffect(() => setPortalReady(true), []);
 
   useEffect(() => {
     if (!root.current) return;
@@ -142,8 +164,34 @@ export default function Home() {
     if (!opened) return;
     let previousY = window.scrollY;
     let travelledToCard = false;
+    let scrollDirection = 0;
+    let distanceInDirection = 0;
+    let lastButterflyBurst = 0;
+    const animationsReadyAt = Date.now() + 1100;
     const onScroll = () => {
       const currentY = window.scrollY;
+      const delta = currentY - previousY;
+      if (delta !== 0) {
+        const nextDirection = Math.sign(delta);
+        if (nextDirection !== scrollDirection) distanceInDirection = 0;
+        scrollDirection = nextDirection;
+        distanceInDirection += Math.abs(delta);
+        const now = Date.now();
+        if (now >= animationsReadyAt && distanceInDirection > 34 && now - lastButterflyBurst > 1050) {
+          lastButterflyBurst = now;
+          distanceInDirection = 0;
+          const burstId = `scroll-${now}`;
+          const burst = Array.from({ length: 5 }, (_, i) => ({
+            id: `${burstId}-${i}`,
+            left: 19 + Math.random() * 62,
+            delay: i * 0.12,
+            drift: [-15, 12, -8, 17, -12][i],
+            color: ["#d67c82", "#cf9690", "#b98489", "#e19b85", "#998b78"][i],
+          }));
+          setButterflies((items) => [...items.slice(-10), ...burst]);
+          window.setTimeout(() => setButterflies((items) => items.filter((item) => !item.id.startsWith(burstId))), 2900);
+        }
+      }
       if (currentY > window.innerHeight * 0.72) travelledToCard = true;
       if (travelledToCard && currentY < previousY && currentY < window.innerHeight * 0.48) {
         travelledToCard = false;
@@ -247,6 +295,7 @@ export default function Home() {
   const renderedWish = wish.replaceAll("{to}", to.trim() || "Bạn").split("\n").filter(Boolean);
 
   return (
+    <>
     <MotionConfig reducedMotion="never">
     <main ref={root} className={`page-shell ${opened ? "is-open" : ""}`}>
       <div className="paper-grain" aria-hidden="true" />
@@ -294,6 +343,13 @@ export default function Home() {
       </section>
     </main>
     </MotionConfig>
+    {portalReady && butterflies.length > 0 && createPortal(
+      <div className="butterfly-layer" aria-hidden="true">
+        {butterflies.map((butterfly) => <span key={butterfly.id} className="butterfly-flight" style={{ left: `${butterfly.left}%`, animationDelay: `${butterfly.delay}s`, "--flight-drift": `${butterfly.drift}vw` }}><Butterfly color={butterfly.color} /></span>)}
+      </div>,
+      document.body,
+    )}
+    </>
   );
 }
 
